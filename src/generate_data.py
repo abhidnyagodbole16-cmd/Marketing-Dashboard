@@ -15,27 +15,31 @@ CAMPAIGNS = {
     "Welcome Series": "Email", "Cart Recovery": "Email",
     "Product Demo Video": "YouTube", "Brand Story": "YouTube",
 }
-# (daily spend, CTR, conversion rate, revenue per conversion, engagement rate)
+# (daily spend, cost per click, CTR, conversion rate, revenue per conversion, engagement rate)
+# ROI works out to roughly: conversion_rate * revenue_per_conversion / cost_per_click - 1
 PROFILE = {
-    "Instagram":  (4000, 0.018, 0.020, 1800, 0.060),
-    "Facebook":   (3500, 0.012, 0.025, 1700, 0.030),
-    "Google Ads": (5000, 0.045, 0.060, 2200, 0.010),
-    "Email":      (800,  0.030, 0.090, 2000, 0.020),
-    "YouTube":    (3000, 0.008, 0.015, 1900, 0.040),
+    "Instagram":  (4000, 12, 0.018, 0.020, 1800, 0.060),
+    "Facebook":   (3500, 15, 0.012, 0.025, 1500, 0.030),
+    "Google Ads": (5000, 30, 0.045, 0.060, 1800, 0.010),
+    "Email":      (800,  15, 0.030, 0.070, 1500, 0.020),
+    "YouTube":    (3000, 20, 0.008, 0.015, 1600, 0.040),
 }
 
 dates = pd.date_range("2025-01-01", "2025-12-31", freq="D")
 rows = []
 for name, channel in CAMPAIGNS.items():
-    spend0, ctr0, cvr0, rpc, eng0 = PROFILE[channel]
+    spend0, cpc0, ctr0, cvr0, rpc, eng0 = PROFILE[channel]
+    # every campaign is a bit better or worse than its channel average
+    cpc_c = cpc0 * rng.uniform(0.8, 1.2)
+    cvr_c = cvr0 * rng.uniform(0.8, 1.2)
     for d in dates:
         season = 1 + 0.25 * np.sin((d.dayofyear / 365) * 2 * np.pi)   # seasonality
         if d.month in (10, 11):                                       # festive boost
             season *= 1.3
         spend = spend0 * rng.uniform(0.7, 1.3) * season
-        impressions = int(spend * rng.uniform(25, 40))
-        clicks = int(impressions * ctr0 * rng.uniform(0.7, 1.3))
-        conversions = int(clicks * cvr0 * rng.uniform(0.6, 1.4))
+        clicks = int(spend / (cpc_c * rng.uniform(0.85, 1.15)))
+        impressions = int(clicks / (ctr0 * rng.uniform(0.85, 1.15)))
+        conversions = int(clicks * cvr_c * rng.uniform(0.6, 1.4))
         revenue = conversions * rpc * rng.uniform(0.8, 1.2)
         reach = int(impressions * rng.uniform(0.55, 0.8))
         engagement = reach * eng0 * rng.uniform(0.7, 1.3)
