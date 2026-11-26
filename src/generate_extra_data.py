@@ -8,9 +8,7 @@ import pandas as pd
 
 rng = np.random.default_rng(7)
 
-# ======================================================================
 # 1. WEBSITE TRAFFIC  (one row per day per traffic source)
-# ======================================================================
 # paid traffic is based on the real clicks from our campaign data,
 # so the two datasets agree with each other
 campaigns = pd.read_csv("data/cleaned/campaigns_clean.csv")
@@ -59,7 +57,7 @@ for d in dates:
 
 traffic = pd.DataFrame(traffic_rows)
 
-# --- add some mess (like the campaign data) ---
+# add some mess (like the campaign data)
 n = len(traffic)
 # wrong spellings of the SAME source (so the cleaning step can fix them)
 source_variants = {
@@ -71,16 +69,14 @@ source_variants = {
 for idx in rng.choice(n, 150, replace=False):
     traffic.at[idx, "source"] = rng.choice(source_variants[traffic.at[idx, "source"]])
 for col, k in [("sessions", 20), ("bounce_rate", 25), ("avg_session_duration", 20)]:
-    traffic.loc[rng.choice(n, k, replace=False), col] = np.nan      # missing values
+    traffic.loc[rng.choice(n, k, replace=False), col] = np.nan  # missing values
 traffic.loc[rng.choice(n, 10, replace=False), "bounce_rate"] = 140  # impossible (>100%)
 traffic = pd.concat([traffic, traffic.sample(30, random_state=2)], ignore_index=True)  # duplicates
 traffic = traffic.sample(frac=1, random_state=3).reset_index(drop=True)
 traffic.to_csv("data/raw/web_traffic_raw.csv", index=False)
 print("Saved data/raw/web_traffic_raw.csv with", len(traffic), "rows")
 
-# ======================================================================
-# 2. SOCIAL MEDIA PERFORMANCE  (one row per post)
-# ======================================================================
+# 2. social media performance  (one row per post)
 # (post types, typical engagement rate per type, posts per week)
 platforms = {
     "Instagram": (["Reel", "Carousel", "Image", "Story"], [0.075, 0.055, 0.035, 0.020], 5),
@@ -97,7 +93,7 @@ for platform, (types, eng_rates, per_week) in platforms.items():
     for pdate in post_dates:
         t = rng.integers(0, len(types))
         month = pd.Timestamp(pdate).month
-        growth = 1 + (month - 1) * 0.02                             # audience slowly grows
+        growth = 1 + (month - 1) * 0.02  # audience slowly grows
         reach = int(base_reach[platform] * growth * rng.uniform(0.5, 1.6))
         impressions = int(reach * rng.uniform(1.1, 1.5))
         engagement = int(reach * eng_rates[t] * rng.uniform(0.7, 1.3))
@@ -119,7 +115,7 @@ for platform, (types, eng_rates, per_week) in platforms.items():
 
 social = pd.DataFrame(post_rows)
 
-# --- add some mess ---
+# add some mess
 n = len(social)
 platform_variants = {
     "Instagram": ["insta", "INSTAGRAM"], "Facebook": ["fb", "facebook "], "YouTube": ["youtube", "YT"],
@@ -129,7 +125,7 @@ for idx in rng.choice(n, 40, replace=False):
 for col, k in [("likes", 12), ("reach", 8), ("shares", 10), ("link_clicks", 10)]:
     social.loc[rng.choice(n, k, replace=False), col] = np.nan
 bad = rng.choice(n, 6, replace=False)
-social.loc[bad, "likes"] = social.loc[bad, "reach"] * 2                # likes > reach: impossible
+social.loc[bad, "likes"] = social.loc[bad, "reach"] * 2  # likes > reach: impossible
 social = pd.concat([social, social.sample(12, random_state=5)], ignore_index=True)
 social = social.sample(frac=1, random_state=9).reset_index(drop=True)
 social.to_csv("data/raw/social_media_raw.csv", index=False)

@@ -7,21 +7,21 @@ from src.kpis import (kpis_by, overall_kpis, social_kpis_by, overall_social_kpis
 from src.insights import generate_insights, inr
 
 
+# round the number columns so the report looks tidy
 def round_table(df):
-    """Round the number columns so the report looks tidy."""
     return df.round(2)
 
 
+# one row per campaign with all KPIs, best ROI first
 def campaign_report(campaigns):
-    """One row per campaign with all KPIs, best ROI first."""
     camp = kpis_by(campaigns, "campaign_name")
     channel_of = campaigns.drop_duplicates("campaign_name").set_index("campaign_name")["channel"]
     camp.insert(1, "channel", camp["campaign_name"].map(channel_of))
     return round_table(camp.sort_values("roi", ascending=False))
 
 
+# the overall numbers plus a table per channel, platform and traffic source
 def marketing_summary(campaigns, social, traffic):
-    """The overall numbers plus a table per channel, platform and traffic source."""
     k = overall_kpis(campaigns)
     overall = pd.DataFrame({
         "Metric": ["Total spend", "Total revenue", "ROI (%)", "CTR (%)", "Conversion rate (%)",
@@ -38,8 +38,8 @@ def marketing_summary(campaigns, social, traffic):
     return tables
 
 
+# month looks like '2025-03'. Returns (tables, summary_text)
 def monthly_report(campaigns, social, traffic, month):
-    """month looks like '2025-03'. Returns (tables, summary_text)."""
     def in_month(df, m):
         return df[df["date"].dt.strftime("%Y-%m") == m]
 
@@ -99,8 +99,8 @@ def monthly_report(campaigns, social, traffic, month):
     return tables, "\n".join(lines)
 
 
+# put several tables into one Excel file (one sheet each) and return the bytes
 def to_excel_bytes(tables):
-    """Put several tables into one Excel file (one sheet each) and return the bytes."""
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
         for name, table in tables.items():
@@ -108,8 +108,8 @@ def to_excel_bytes(tables):
     return buffer.getvalue()
 
 
+# the insights page as a markdown text file
 def insights_text(campaigns, social, traffic):
-    """The insights page as a markdown text file."""
     findings, recs = generate_insights(campaigns, social, traffic)
     lines = ["# Business Insights & Recommendations", "", "(Synthetic dataset - 'in this dataset...')", ""]
     for section, items in findings.items():

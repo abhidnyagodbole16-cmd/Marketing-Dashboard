@@ -8,8 +8,8 @@ MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 
+# write a rupee amount the Indian way: lakh (L) and crore (Cr)
 def inr(x):
-    """Write a rupee amount the Indian way: lakh (L) and crore (Cr)."""
     if abs(x) >= 1e7:
         return f"₹{x / 1e7:.2f} Cr"
     if abs(x) >= 1e5:
@@ -17,8 +17,8 @@ def inr(x):
     return f"₹{x:,.0f}"
 
 
+# one row per month with spend, revenue, ROI and engagement rate
 def monthly_table(campaigns):
-    """One row per month with spend, revenue, ROI and engagement rate."""
     df = campaigns.copy()
     df["month_num"] = df["date"].dt.month
     m = df.groupby("month_num")[["spend", "revenue", "likes", "shares", "comments", "reach"]].sum().reset_index()
@@ -28,14 +28,13 @@ def monthly_table(campaigns):
     return m
 
 
+# returns (findings, recommendations). findings is a dictionary: section name -> list of sentences
 def generate_insights(campaigns, social, traffic):
-    """Returns (findings, recommendations).
-    findings is a dictionary: section name -> list of sentences."""
     findings = {"Channels": [], "Campaigns": [], "Trends & patterns": [],
                 "Social media": [], "Website traffic": []}
     recs = []
 
-    # ------------------------------------------------------------------ channels
+    # channels
     ch = kpis_by(campaigns, "channel")
     if len(ch) >= 2:
         best = ch.loc[ch["roi"].idxmax()]
@@ -83,7 +82,7 @@ def generate_insights(campaigns, social, traffic):
                 f"Review {worst['channel']} before spending more on it: improve the targeting or "
                 f"creative first, or pause its weakest campaigns.")
 
-    # ------------------------------------------------------------------ campaigns
+    # campaigns
     camp = kpis_by(campaigns, "campaign_name")
     channel_of = campaigns.drop_duplicates("campaign_name").set_index("campaign_name")["channel"]
     camp["channel"] = camp["campaign_name"].map(channel_of)
@@ -104,7 +103,7 @@ def generate_insights(campaigns, social, traffic):
             recs.append(f"Fix or stop the campaigns with negative ROI ({names}).")
         recs.append(f"Scale up '{best_c['campaign_name']}' step by step, since it has the best ROI.")
 
-    # ------------------------------------------------------------------ trends
+    # trends
     m = monthly_table(campaigns)
     if len(m) >= 3:
         best_m = m.loc[m["revenue"].idxmax()]
@@ -140,7 +139,7 @@ def generate_insights(campaigns, social, traffic):
         findings["Trends & patterns"].append(
             f"Campaign engagement rate is highest in {best_e['month']} ({best_e['engagement_rate']:.2f}%).")
 
-    # ------------------------------------------------------------------ social media
+    # social media
     if len(social) > 0:
         plat = social_kpis_by(social, "platform")
         best_p = plat.loc[plat["engagement_rate"].idxmax()]
@@ -148,7 +147,7 @@ def generate_insights(campaigns, social, traffic):
             f"{best_p['platform']} has the highest engagement rate ({best_p['engagement_rate']:.2f}%).")
 
         types = social_kpis_by(social, ["platform", "post_type"])
-        types = types[types["posts"] >= 5]               # ignore tiny groups
+        types = types[types["posts"] >= 5]  # ignore tiny groups
         if len(types) >= 2:
             best_t = types.loc[types["engagement_rate"].idxmax()]
             worst_t = types.loc[types["engagement_rate"].idxmin()]
@@ -165,7 +164,7 @@ def generate_insights(campaigns, social, traffic):
             f"{top_growth['platform']} gains followers fastest relative to reach "
             f"({top_growth['follower_growth_rate']:.2f} new followers per 100 people reached).")
 
-    # ------------------------------------------------------------------ website
+    # website
     if len(traffic) > 0:
         src = web_kpis_by(traffic, "source")
         biggest = src.loc[src["sessions"].idxmax()]

@@ -3,10 +3,8 @@
 
 import pandas as pd
 
-# ======================================================================
-# PART 1: WEBSITE TRAFFIC
-# ======================================================================
-print("===== WEBSITE TRAFFIC =====")
+# part 1: website traffic
+print("Website traffic")
 traffic = pd.read_csv("data/raw/web_traffic_raw.csv")
 print("Rows at start:", len(traffic))
 print("Missing values at start:", traffic.isna().sum().sum())
@@ -52,10 +50,8 @@ print("Duplicates left:", traffic.duplicated().sum())
 print("Rows at end:", len(traffic))
 traffic.to_csv("data/cleaned/web_traffic_clean.csv", index=False)
 
-# ======================================================================
-# PART 2: SOCIAL MEDIA
-# ======================================================================
-print("\n===== SOCIAL MEDIA =====")
+# part 2: social media
+print("\nSocial media")
 social = pd.read_csv("data/raw/social_media_raw.csv")
 print("Rows at start:", len(social))
 print("Missing values at start:", social.isna().sum().sum())

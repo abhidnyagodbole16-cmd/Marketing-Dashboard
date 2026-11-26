@@ -1,7 +1,6 @@
-"""Generate a messy marketing dataset (Module 1: data collection).
-Run from the project root:  python src/generate_data.py
-Output: data/raw/campaigns_raw.csv
-"""
+# Generate a messy marketing dataset (Module 1: data collection).
+# Run from the project root:  python src/generate_data.py
+# Output: data/raw/campaigns_raw.csv
 import numpy as np
 import pandas as pd
 
@@ -33,8 +32,8 @@ for name, channel in CAMPAIGNS.items():
     cpc_c = cpc0 * rng.uniform(0.8, 1.2)
     cvr_c = cvr0 * rng.uniform(0.8, 1.2)
     for d in dates:
-        season = 1 + 0.25 * np.sin((d.dayofyear / 365) * 2 * np.pi)   # seasonality
-        if d.month in (10, 11):                                       # festive boost
+        season = 1 + 0.25 * np.sin((d.dayofyear / 365) * 2 * np.pi)  # seasonality
+        if d.month in (10, 11):  # festive boost
             season *= 1.3
         spend = spend0 * rng.uniform(0.7, 1.3) * season
         clicks = int(spend / (cpc_c * rng.uniform(0.85, 1.15)))
@@ -53,7 +52,7 @@ for name, channel in CAMPAIGNS.items():
 
 df = pd.DataFrame(rows)
 
-# ---------- add deliberate mess so there is real cleaning to do ----------
+# add deliberate mess so there is real cleaning to do
 n = len(df)
 
 # 1) inconsistent channel names
@@ -70,13 +69,13 @@ for col, k in [("spend", 60), ("impressions", 50), ("clicks", 70), ("conversions
     df.loc[rng.choice(n, k, replace=False), col] = np.nan
 
 # 3) impossible values
-df.loc[rng.choice(n, 15, replace=False), "spend"] = -abs(df["spend"].mean())   # negative spend
+df.loc[rng.choice(n, 15, replace=False), "spend"] = -abs(df["spend"].mean())  # negative spend
 bad = rng.choice(n, 20, replace=False)
-df.loc[bad, "clicks"] = df.loc[bad, "impressions"] + 500                       # clicks > impressions
+df.loc[bad, "clicks"] = df.loc[bad, "impressions"] + 500  # clicks > impressions
 
 # 4) duplicate rows
 df = pd.concat([df, df.sample(80, random_state=1)], ignore_index=True)
 
-df = df.sample(frac=1, random_state=7).reset_index(drop=True)                  # shuffle
+df = df.sample(frac=1, random_state=7).reset_index(drop=True)  # shuffle
 df.to_csv("data/raw/campaigns_raw.csv", index=False)
 print(f"Saved data/raw/campaigns_raw.csv with {len(df)} rows")

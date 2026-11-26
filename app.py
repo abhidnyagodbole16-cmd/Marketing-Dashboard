@@ -4,7 +4,6 @@
 import sqlite3
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
 
 from src.kpis import (kpis_by, overall_kpis, social_kpis_by, overall_social_kpis,
@@ -13,7 +12,7 @@ from src.insights import generate_insights, monthly_table, inr, MONTH_NAMES
 from src.reports import (campaign_report, marketing_summary, monthly_report,
                          to_excel_bytes, insights_text)
 
-st.set_page_config(page_title="Marketing Performance Dashboard", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Marketing Performance Dashboard", layout="wide")
 
 # one colour per channel so every chart uses the same colours
 COLORS = {"Instagram": "#E1306C", "Facebook": "#1877F2", "Google Ads": "#F4B400",
@@ -21,9 +20,7 @@ COLORS = {"Instagram": "#E1306C", "Facebook": "#1877F2", "Google Ads": "#F4B400"
 PAID = list(COLORS.keys())
 
 
-# ----------------------------------------------------------------------------
 # loading data
-# ----------------------------------------------------------------------------
 @st.cache_data
 def load_data():
     conn = sqlite3.connect("marketing.db")
@@ -34,9 +31,9 @@ def load_data():
     return campaigns, social, traffic
 
 
+# compares each raw file with its cleaned version (for the Data Quality tab)
 @st.cache_data
 def load_quality_table():
-    """Compares each raw file with its cleaned version (for the Data Quality tab)."""
     files = {
         "Campaigns": ("data/raw/campaigns_raw.csv", "data/cleaned/campaigns_clean.csv"),
         "Social media": ("data/raw/social_media_raw.csv", "data/cleaned/social_media_clean.csv"),
@@ -58,13 +55,13 @@ def load_quality_table():
     return pd.DataFrame(rows)
 
 
+# draw a plotly chart at full width
 def show(fig):
-    """Draw a plotly chart at full width."""
     st.plotly_chart(fig, use_container_width=True)
 
 
+# items = list of (label, value, optional help text)
 def kpi_row(items):
-    """items = list of (label, value, optional help text)"""
     cols = st.columns(len(items))
     for col, item in zip(cols, items):
         if len(item) == 3:
@@ -75,16 +72,12 @@ def kpi_row(items):
 
 campaigns_all, social_all, traffic_all = load_data()
 
-# ----------------------------------------------------------------------------
 # title
-# ----------------------------------------------------------------------------
-st.title("📊 Marketing Performance Dashboard")
+st.title("Marketing Performance Dashboard")
 st.caption("Dataset: self-created (synthetic) marketing data for 2025. "
            "Insights describe this dataset only, not real businesses.")
 
-# ----------------------------------------------------------------------------
 # sidebar filters
-# ----------------------------------------------------------------------------
 st.sidebar.header("Filters")
 
 min_date = campaigns_all["date"].min().date()
@@ -127,16 +120,12 @@ if campaigns.empty:
     st.warning("No campaign data for these filters. Try selecting more channels, campaigns or dates.")
     st.stop()
 
-# ----------------------------------------------------------------------------
 # tabs
-# ----------------------------------------------------------------------------
 tab_overview, tab_channels, tab_trends, tab_social, tab_web, tab_insights, tab_reports, tab_quality = st.tabs([
     "Overview", "Channels & Campaigns", "Trends & Patterns", "Social Media",
     "Website Traffic", "Insights", "Reports", "Data Quality"])
 
-# ============================================================================
-# TAB 1: OVERVIEW
-# ============================================================================
+# tab 1: overview
 with tab_overview:
     k = overall_kpis(campaigns)
     st.subheader("Campaign KPIs")
@@ -199,9 +188,7 @@ with tab_overview:
         fig.update_layout(xaxis_title=None, yaxis_title="₹", legend_title=None)
         show(fig)
 
-# ============================================================================
-# TAB 2: CHANNELS & CAMPAIGNS
-# ============================================================================
+# tab 2: channels & campaigns
 with tab_channels:
     st.subheader("Channel comparison")
     ch = kpis_by(campaigns, "channel").sort_values("roi", ascending=False)
@@ -266,9 +253,7 @@ with tab_channels:
     else:
         st.info("No website data for these filters.")
 
-# ============================================================================
-# TAB 3: TRENDS & PATTERNS
-# ============================================================================
+# tab 3: trends & patterns
 with tab_trends:
     st.subheader("Monthly trends")
     m = monthly_table(campaigns)
@@ -322,9 +307,7 @@ with tab_trends:
         for line in findings["Trends & patterns"]:
             st.markdown(f"- {line}")
 
-# ============================================================================
-# TAB 4: SOCIAL MEDIA
-# ============================================================================
+# tab 4: social media
 with tab_social:
     if social.empty:
         st.info("No social media data for these filters. Select Instagram, Facebook or YouTube.")
@@ -379,9 +362,7 @@ with tab_social:
         top_posts["date"] = top_posts["date"].dt.date
         st.dataframe(top_posts, use_container_width=True, hide_index=True)
 
-# ============================================================================
-# TAB 5: WEBSITE TRAFFIC
-# ============================================================================
+# tab 5: website traffic
 with tab_web:
     if traffic.empty:
         st.info("No website data for these filters.")
@@ -422,9 +403,7 @@ with tab_web:
         st.markdown("**Traffic source summary**")
         st.dataframe(src.round(2), use_container_width=True, hide_index=True)
 
-# ============================================================================
-# TAB 6: INSIGHTS
-# ============================================================================
+# tab 6: insights
 with tab_insights:
     st.subheader("Business insights")
     st.caption("Generated automatically from the filtered data, so these change when you change the filters. "
@@ -446,9 +425,7 @@ with tab_insights:
     st.download_button("Download insights (.md)", insights_text(campaigns, social, traffic),
                        file_name="insights.md", mime="text/markdown")
 
-# ============================================================================
-# TAB 7: REPORTS
-# ============================================================================
+# tab 7: reports
 with tab_reports:
     st.subheader("Report generation")
     report_type = st.radio("Choose a report", ["Campaign report", "Marketing summary", "Monthly analytics report"],
@@ -489,9 +466,7 @@ with tab_reports:
         st.download_button("Download summary (.md)", summary,
                            file_name=f"monthly_summary_{month}.md", mime="text/markdown")
 
-# ============================================================================
-# TAB 8: DATA QUALITY
-# ============================================================================
+# tab 8: data quality
 with tab_quality:
     st.subheader("Data cleaning summary")
     st.write("Each dataset was created with deliberate quality problems and then cleaned "
