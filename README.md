@@ -2,7 +2,7 @@
 
 A data analytics project that tracks, analyses and visualises marketing campaign performance across five channels (Instagram, Facebook, Google Ads, Email and YouTube). It was built as the Data Analytics Capstone Project for SkillOrbit.
 
-**Live dashboard:** [PASTE YOUR STREAMLIT LINK HERE]
+**Live dashboard:** (https://marketing-dashboard-msw7v85jucjbsucgjqstsj.streamlit.app/)
 
 ![Overview](screenshots/01_overview.png)
 
@@ -85,7 +85,7 @@ marketing-dashboard/
 2. Clone the repository and install the libraries:
 
 ```
-git clone [PASTE YOUR GITHUB LINK HERE]
+git clone https://github.com/abhidnyagodbole16-cmd/Marketing-Dashboard
 cd marketing-dashboard
 pip install -r requirements.txt
 ```
@@ -142,7 +142,7 @@ Each raw file goes through the same steps:
 | | |
 |---|---|
 | ![Channels](screenshots/02_channels.png) | ![Trends](screenshots/03_trends.png) |
-| ![Insights](screenshots/04_insights.png) | ![Reports](screenshots/05_reports.png) |
+| ![Insights](screenshots/06_insights.png) | ![Reports](screenshots/07_reports.png) |
 
 ## Limitations
 
@@ -153,5 +153,5 @@ Each raw file goes through the same steps:
 
 ## Author
 
-[YOUR NAME]
-[Course / batch]
+Abhidnya Godbole
+SkillOrbit Data Analytics
